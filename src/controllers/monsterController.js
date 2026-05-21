@@ -1,12 +1,15 @@
 const Monster = require('../models/monster');
+const mongoose = require('mongoose');
 
 // 1. Mengambil semua data monster (untuk daftar list di UI Godot)
 exports.getAllMonsters = async (req, res) => {
   try {
-    const monsters = await Monster.find({}, 'monster_id display_name class elements media.thumbnail');
+    const monsters = await Monster.find({});
+    console.log("Database yang diakses:", mongoose.connection.name);
+    console.log("Jumlah data ditemukan:", monsters.length); 
     res.status(200).json(monsters);
   } catch (error) {
-    res.status(500).json({ message: "Gagal mengambil data monster", error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -23,7 +26,7 @@ exports.getMonsterById = async (req, res) => {
   }
 };
 
-// 3. Menambahkan monster baru (berguna untuk CMS / Live-Ops Tool Anda nanti)
+// 3. Menambahkan monster baru (berguna untuk CMS / Live-Ops Tool nanti)
 exports.createMonster = async (req, res) => {
   try {
     const newMonster = new Monster(req.body);

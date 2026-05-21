@@ -55,4 +55,4 @@ const MonsterSchema = new mongoose.Schema({
   lore: { type: String }
 }, { timestamps: true }); // Menambahkan kolom createdAt dan updatedAt otomatis
 
-module.exports = mongoose.model('monster', MonsterSchema);
+module.exports = mongoose.model('Monster', MonsterSchema, 'monster');

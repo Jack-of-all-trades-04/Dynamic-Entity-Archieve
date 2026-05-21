@@ -1,0 +1,15 @@
+Reset yaml
+kubectl delete -f manifest.yaml
+kubectl apply -f manifest.yaml
+
+Update Build
+eval $(minikube docker-env)
+docker build -t bestiary-backend:v4 .
+kubectl rollout restart deployment/backend
+
+Check Status
+kubectl get pods
+kubectl logs deployment/backend
+
+Kill Port
+sudo lsof -t -i:5000 | xargs sudo kill -9

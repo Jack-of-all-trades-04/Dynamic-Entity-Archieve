@@ -1,0 +1,98 @@
+# 1. DATABASE: MongoDB Deployment & Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:latest
+        ports:
+        - containerPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+spec:
+  selector:
+    app: mongodb
+  ports:
+  - protocol: TCP
+    port: 27017
+    targetPort: 27017
+
+---
+
+# 2. BACKEND: Node.js API Deployment & Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: bestiary-backend:v-dev
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+        env:
+        - name: PORT
+          value: "5000"
+        - name: MONGO_URI
+          value: "mongodb://mongodb-service:27017/test"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend
+  ports:
+  - protocol: TCP
+    port: 5005
+    targetPort: 5000
+
+---
+
+# 3. KONEKTOR: Cloudflare Tunnel Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudflared
+  template:
+    metadata:
+      labels:
+        app: cloudflared
+    spec:
+      containers:
+      - name: cloudflared
+        image: cloudflare/cloudflared:latest
+        args: ["tunnel", "--no-autoupdate", "run"]
+        env:
+        - name: TUNNEL_TOKEN
+          value: "eyJhIjoiYTNmYmFmNTdjODA5MmE5MjY2ZGNkYTczMTYxZDM4YmQiLCJ0IjoiMzNmOTk3N2QtNzdhYS00MzZlLTkzOWUtMDAwNzg3NTdjODc0IiwicyI6Ik5qWmxPV05oTURVdFlqZzFPQzAwTlRZeUxXRTJOalV0TURnNE5UVTVZelExWlRZeiJ9"
