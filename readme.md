@@ -1,65 +1,104 @@
-Detroit Bestiary: Dynamic Entity Archive
-A Cloud-Native, Document-Oriented Game Encyclopedia System
-Detroit Bestiary: Dynamic Entity Archive adalah sistem manajemen entitas game berbasis cloud yang dirancang untuk menangani data yang sangat dinamis dan heterogen secara real-time. Proyek ini mengintegrasikan fleksibilitas MongoDB, keamanan Cloudflare, dan skalabilitas Kubernetes untuk menciptakan ensiklopedia monster (Bestiary) yang dapat diperbarui secara instan tanpa memerlukan pembaruan aplikasi (update patch) di sisi pemain. 
-📑 Daftar Isi
-•	Gambaran Umum
-•	Tech Stack
-•	Arsitektur Sistem
-•	Model Data (NoSQL)
-•	Fitur Unggulan
-•	Struktur Tim
-🧐 Gambaran Umum
-Masalah utama dalam pengembangan game tradisional adalah data entitas (seperti monster atau item) sering kali di-hardcode, sehingga perubahan status seperti nerf atau buff memerlukan update aplikasi yang merepotkan. 
-Proyek ini mengadopsi strategi Live-Ops yang terinspirasi dari EA Sports, menggunakan database NoSQL untuk memungkinkan perubahan atribut secara real-time langsung melalui backend. 
-🛠 Tech Stack
-Sistem ini dibangun menggunakan kombinasi teknologi modern:
-•	Frontend & Client: Godot Engine (GDScript) untuk performa visual dan manipulasi objek 3D/2D yang mulus. 
-•	Database: MongoDB (Document-Oriented) untuk penyimpanan data polymorphic yang fleksibel. 
-•	Infrastructure: Kubernetes (K8s) untuk hosting cluster database dan API backend dengan kemampuan Zero Downtime Deployment. 
-•	Security & Networking: Cloudflare (Tunnel, WAF, DNS) untuk mengamankan API backend dan enkripsi koneksi (SSL/TLS). 
-🏗 Arsitektur Sistem
-Alur komunikasi data dirancang untuk mengutamakan keamanan dengan tidak menghubungkan client secara langsung ke database: 
-1.	Godot Client: Melakukan HTTPRequest ke URL aman yang disediakan Cloudflare. 
-2.	Cloudflare: Menyaring trafik melalui WAF dan meneruskannya melalui Cloudflare Tunnel ke dalam cluster internal. 
-3.	Kubernetes API Gateway: Menangani logika aplikasi dan mengonversi data BSON dari MongoDB menjadi JSON untuk dikirim ke Godot. 
-4.	MongoDB Cluster: Berjalan sebagai StatefulSet di Kubernetes, menyimpan jutaan dokumen entitas dalam beberapa shards untuk skalabilitas horizontal. 
-📊 Model Data (NoSQL)
-Kami menggunakan pendekatan Data Locality, di mana data yang sering diakses bersama disimpan dalam satu dokumen JSON besar untuk menghindari operasi JOIN yang berat. 
-Contoh Dokumen Monster:
-JSON
-{
-  "id": "MSTR-7721",
-  "display_name": "Ignis Drake",
-  "class": "Elite / World Boss",
-  "elements": ["Fire", "Flying"],
-  "stats_base": {
-    "health": 15000,
-    "attack_power": 450,
-    "resistances": { "fire": 1.0, "ice": -0.5 }
-  },
-  "abilities": [
-    {
-      "name": "Inferno Breath",
-      "type": "Active",
-      "damage_type": "Magical",
-      "base_damage": 1200
-    }
-  ],
-  "loot_table": {
-    "exp_reward": 5500,
-    "drops": [{ "item_id": "ITM-DRG-SCALE", "drop_chance": 0.15 }]
-  }
-}
-Struktur ini memungkinkan penambahan atribut unik (seperti "limited_edition") tanpa merusak skema data monster lainnya. 
-🌟 Fitur Unggulan
-•	Schema-less Flexibility: Menambah monster baru dengan atribut unik kini semudah mengunggah dokumen JSON baru. 
-•	Global Scaling: Melalui fitur native sharding MongoDB, data dapat didistribusikan ke berbagai region secara horizontal. 
-•	Zero Downtime: Melakukan pembaruan konten atau patching backend tanpa perlu mematikan server game (maintenance). 
-•	Cross-Platform Consistency: Godot memastikan tampilan UI Bestiary tetap konsisten di Android, iOS, Windows, maupun Web. 
-👥 Struktur Tim
-Nama	Peran	Tanggung Jawab
-Jonathan Christopher	Backend & Database Engineer	Mengelola cluster MongoDB di K8s dan membangun API Gateway.
-Novan Agung Wicaksono	Godot Integration Developer	Menangani HTTPRequest dan parsing JSON menjadi objek Resource di Godot.
-Qais Ismail	Cloud & Security Architect	Mengonfigurasi Cloudflare Tunnel dan memastikan keamanan SSL/TLS.
-Proyek ini merupakan bagian dari NoSQL Mini Project Research yang menganalisis efisiensi Document Store pada skala industri game modern. 
+# Detroit Bestiary: Dynamic Entity Archive
+### SBD (Sistem Basis Data) Research & CMS Project
 
+Proyek ini adalah monorepo sistem manajemen entitas game dinamis (Bestiary) berbasis web yang membandingkan performa antara **Document Store NoSQL (MongoDB)** dan **Relational Database SQL (MySQL)** secara langsung melalui aplikasi **React + Vite** dan **Express Backend API**.
+
+---
+
+## 📁 Struktur Repositori
+
+```text
+Dynamic-Entity-Archieve/
+├── backend/            # Express.js API & Database Sync Logic
+│   ├── src/
+│   │   ├── config/     # Konfigurasi Database (MongoDB & MySQL Pool)
+│   │   ├── controllers/# Logic CRUD & Sinkronisasi SQL
+│   │   ├── models/     # Mongoose Schemas (NoSQL Document)
+│   │   ├── routes/     # Routing CRUD Bestiary
+│   │   └── index.js    # Entry point backend & API benchmark
+│   ├── Dockerfile
+│   ├── manifest.yaml   # K8s Deployment (MongoDB, Backend, Cloudflared)
+│   └── mysql-manifest.yaml
+└── frontend/           # React + Vite Client (CMS & Testbench)
+    ├── src/
+    │   ├── App.jsx     # Logic & State (CMS & Performance Chart)
+    │   ├── index.css   # Desain system bertema Cyber Dark Mode
+    │   └── main.jsx
+    └── index.html
+```
+
+---
+
+## 🛠 Tech Stack
+
+- **Frontend & Client**: React 18, Vite, Vanilla CSS (Premium Cyberpunk Dark Theme, SVG Charts, Glassmorphism).
+- **Backend API**: Node.js, Express.js.
+- **NoSQL Database**: MongoDB (Mongoose) - Menyimpan dokumen polimorfik entitas Monster secara utuh (Abilities, Stats, Loot Table) dalam satu dokumen.
+- **SQL Database**: MySQL (mysql2) - Menyimpan data relasional terpisah di tabel `monsters`, `monster_stats`, `monster_elements`, dan `monster_abilities` dengan relasi kunci asing (Foreign Key & Cascade Delete) sebagai pembanding.
+
+---
+
+## 🚀 Panduan Menjalankan Aplikasi (CLI Commands)
+
+Jalankan perintah berikut menggunakan terminal di Windows (PowerShell/CMD).
+
+### Langkah 1: Jalankan Database
+
+#### Pilihan A: Menggunakan Kubernetes (Minikube)
+Masuk ke folder `backend` lalu terapkan manifest Kubernetes:
+```powershell
+cd backend
+# Mulai minikube
+minikube start
+
+# Terapkan deploy MongoDB & Backend & MySQL
+kubectl apply -f manifest.yaml
+kubectl apply -f mysql-manifest.yaml
+
+# Forward port database ke komputer lokal
+kubectl port-forward svc/mongodb-service 27017:27017
+kubectl port-forward svc/mysql-service 3306:3306
+```
+
+#### Pilihan B: Menggunakan Docker (Local)
+Jika menggunakan Docker Desktop langsung di lokal tanpa Kubernetes:
+```powershell
+# Jalankan MongoDB lokal
+docker run -d --name mongodb-local -p 27017:27017 mongo:latest
+
+# Jalankan MySQL lokal (Password diset: admin123, Database: bestiary_db)
+docker run -d --name mysql-local -p 3306:3306 -e MYSQL_ROOT_PASSWORD=admin123 -e MYSQL_DATABASE=bestiary_db mysql:8.0
+```
+
+---
+
+### Langkah 2: Jalankan Backend API
+Buka terminal baru di direktori `backend/`:
+```powershell
+cd backend
+# Jalankan backend api server (berjalan di http://localhost:5000)
+npm.cmd run dev
+```
+
+*Catatan: Pastikan database MongoDB dan MySQL sudah aktif sebelum menyalakan backend.*
+
+---
+
+### Langkah 3: Jalankan Frontend
+Buka terminal baru di direktori `frontend/`:
+```powershell
+cd frontend
+# Jalankan server pengembangan Vite (berjalan di http://localhost:5173)
+npm.cmd run dev
+```
+
+Buka browser dan buka **`http://localhost:5173`**.
+
+---
+
+### Langkah 4: Setup Skema Tabel SQL & Semai Data Pertama Kali
+Setelah membuka aplikasi di browser:
+1. Navigasi ke tab **⚡ Performance Testbench**.
+2. Klik tombol **`🔄 Reset & Seed 5 Monster Default`**.
+   - Backend akan otomatis membuat tabel MySQL yang diperlukan (`monsters`, `monster_stats`, `monster_elements`, `monster_abilities`) dan memasukkan 5 monster awal ke MongoDB dan MySQL secara sinkron.
+3. Database sekarang sudah siap digunakan untuk CRUD maupun benchmark!

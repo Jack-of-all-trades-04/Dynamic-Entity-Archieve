@@ -11,4 +11,10 @@ router.get('/:id', monsterController.getMonsterById);
 // Endpoint: POST /api/bestiary (Tambah data monster baru)
 router.post('/', monsterController.createMonster);
 
+// Endpoint: PUT /api/bestiary/:id (Perbarui data monster)
+router.put('/:id', monsterController.updateMonster);
+
+// Endpoint: DELETE /api/bestiary/:id (Hapus data monster)
+router.delete('/:id', monsterController.deleteMonster);
+
 module.exports = router;
